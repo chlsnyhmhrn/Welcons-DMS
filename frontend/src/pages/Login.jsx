@@ -19,25 +19,59 @@ export default function Login() {
   });
 
   const handleLogin = async () => {
+
+    // ================= VALIDASI KOSONG =================
+    if (!form.email || !form.password) {
+
+      alert("Semua field wajib diisi");
+
+      return;
+    }
+
+    // ================= VALIDASI FORMAT EMAIL =================
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(form.email)) {
+
+      alert("Format email tidak valid");
+
+      return;
+    }
+
     try {
-      const res = await fetch("http://localhost:5000/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(form)
-      });
+
+      const res = await fetch(
+        "http://localhost:5000/login",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify(form)
+        }
+      );
 
       const data = await res.json();
 
       if (data.success) {
-        login(data.user); // simpan ke context
+
+        login(data.user);
+
         navigate("/");
+
       } else {
+
         alert(data.message);
       }
+
     } catch (err) {
+
       console.log(err);
+
       alert("Server error");
     }
   };
