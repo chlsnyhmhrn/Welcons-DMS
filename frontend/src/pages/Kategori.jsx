@@ -14,6 +14,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
@@ -34,10 +37,41 @@ export default function Kategori() {
 
   const [form, setForm] = useState({
     nama_kategori: "",
+
+    jenis_proyek: "",
+    bidang: "",
+    jenis_form: "",
+    item_pekerjaan: "",
+
+    is_tipikal: 0,
+
     is_active: 1
   });
 
   const [editId, setEditId] = useState(null);
+
+    const jenisProyekList = [
+    "Gedung",
+    "Rumah",
+    "Pondasi Bawah"
+  ];
+
+  const bidangList = [
+    "Struktur",
+    "Arsitektur",
+    "Plumbing",
+    "Fire Fighting",
+    "AC",
+    "Elektrikal",
+    "Elektronik"
+  ];
+
+  const jenisFormList = [
+    "IPL",
+    "Form Inspeksi",
+    "Form Test",
+    "Piling Record"
+  ];
 
   // ================= FETCH DATA =================
   const fetchData = async () => {
@@ -74,6 +108,14 @@ export default function Kategori() {
 
     setForm({
       nama_kategori: "",
+
+      jenis_proyek: "",
+      bidang: "",
+      jenis_form: "",
+      item_pekerjaan: "",
+
+      is_tipikal: 0,
+
       is_active: 1
     });
 
@@ -86,8 +128,13 @@ export default function Kategori() {
   const handleSubmit = async () => {
 
     // ================= VALIDASI FIELD =================
-    if (!form.nama_kategori.trim()) {
-
+    if (
+      !form.nama_kategori ||
+      !form.jenis_proyek ||
+      !form.bidang ||
+      !form.jenis_form ||
+      !form.item_pekerjaan
+    ){
       alert(
         "Nama kategori wajib diisi"
       );
@@ -127,13 +174,7 @@ export default function Kategori() {
 
         await axios.put(
           `http://localhost:5000/kategori/${editId}`,
-          {
-            nama_kategori:
-              form.nama_kategori,
-
-            is_active:
-              form.is_active ?? 1
-          }
+          form
         );
 
       } else {
@@ -141,10 +182,7 @@ export default function Kategori() {
         // ================= TAMBAH =================
         await axios.post(
           "http://localhost:5000/kategori",
-          {
-            nama_kategori:
-              form.nama_kategori
-          }
+          form
         );
       }
 
@@ -168,6 +206,21 @@ export default function Kategori() {
     setForm({
       nama_kategori:
         item.nama_kategori,
+
+      jenis_proyek:
+        item.jenis_proyek,
+
+      bidang:
+        item.bidang,
+
+      jenis_form:
+        item.jenis_form,
+
+      item_pekerjaan:
+        item.item_pekerjaan,
+
+      is_tipikal:
+        item.is_tipikal ?? 0,
 
       is_active:
         item.is_active
@@ -205,6 +258,29 @@ export default function Kategori() {
       );
     }
   };
+
+  // ================= GROUP KATEGORI =================
+    const groupedKategori = {
+
+      Gedung:
+        kategori.filter(
+          (item) =>
+            item.jenis_proyek === "Gedung"
+        ),
+
+      Rumah:
+        kategori.filter(
+          (item) =>
+            item.jenis_proyek === "Rumah"
+        ),
+
+      "Pondasi Bawah":
+        kategori.filter(
+          (item) =>
+            item.jenis_proyek ===
+            "Pondasi Bawah"
+        )
+    };
 
   return (
     <MainLayout title="Kategori Dokumen">
@@ -255,70 +331,142 @@ export default function Kategori() {
         }}
       >
 
-        {kategori.map((item) => (
+        {Object.entries(
+        groupedKategori
+      ).map(
+        ([group, items]) => (
 
-          <Box key={item.id_kategori}>
+          <Box key={group}>
 
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              py={2}
+            {/* ================= HEADER GROUP ================= */}
+            <Typography
+              fontWeight="bold"
+              fontSize={18}
+              sx={{
+                mb: 2,
+                mt: 2
+              }}
             >
+              {group}
+            </Typography>
 
-              {/* ================= INFO ================= */}
-              <Box>
+           {/* ================= GROUP BIDANG ================= */}
+            {bidangList.map((bidang) => {
 
-                <Typography
-                  fontWeight="bold"
-                  fontSize={16}
+              const bidangItems =
+                items.filter(
+                  (item) =>
+                    item.bidang === bidang
+                );
+
+              // 🔥 SKIP KALAU KOSONG
+              if (bidangItems.length === 0)
+                return null;
+
+              return (
+
+                <Box
+                  key={bidang}
+                  sx={{ mb: 4 }}
                 >
-                  {item.nama_kategori}
-                </Typography>
 
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: 0.5 }}
-                >
-                  {item.kode_kategori}
-                </Typography>
+                  {/* ================= HEADER BIDANG ================= */}
+                  <Typography
+                    fontWeight="bold"
+                    fontSize={16}
+                    sx={{
+                      color: "#1976d2",
+                      mb: 1
+                    }}
+                  >
+                    {bidang}
+                  </Typography>
 
-              </Box>
+                  {/* ================= LIST ITEM ================= */}
+                  {bidangItems.map(
+                    (item) => (
 
-              {/* ================= ACTION ================= */}
-              <Box>
+                      <Box
+                        key={item.id_kategori}
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        sx={{
+                          py: 1.2,
+                          px: 1,
+                          borderRadius: 2,
 
-                {/* EDIT */}
-                <IconButton
-                  onClick={() =>
-                    handleEdit(item)
-                  }
-                >
-                  <EditOutlinedIcon />
-                </IconButton>
+                          "&:hover": {
+                            bgcolor:
+                              "#f5f5f5"
+                          }
+                        }}
+                      >
 
-                {/* DELETE */}
-                <IconButton
-                  color="error"
-                  onClick={() =>
-                    handleDelete(
-                      item.id_kategori
+                        {/* ================= INFO ================= */}
+                          <Box>
+
+                            <Typography
+                              fontSize={15}
+                            >
+                              • {item.jenis_form}
+                              {" - "}
+                              {item.item_pekerjaan}
+                            </Typography>
+
+                            {item.is_tipikal === 1 && (
+
+                              <Typography
+                                variant="body2"
+                                color="primary"
+                                sx={{ ml: 2 }}
+                              >
+                                Tipikal
+                              </Typography>
+                            )}
+
+                          </Box>
+
+                        {/* ================= ACTION ================= */}
+                        <Box>
+
+                          <IconButton
+                            size="small"
+                            onClick={() =>
+                              handleEdit(item)
+                            }
+                          >
+                            <EditOutlinedIcon
+                              fontSize="small"
+                            />
+                          </IconButton>
+
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() =>
+                              handleDelete(
+                                item.id_kategori
+                              )
+                            }
+                          >
+                            <DeleteOutlineOutlinedIcon
+                              fontSize="small"
+                            />
+                          </IconButton>
+
+                        </Box>
+
+                      </Box>
                     )
-                  }
-                >
-                  <DeleteOutlineOutlinedIcon />
-                </IconButton>
+                  )}
 
-              </Box>
-
-            </Box>
-
-            <Divider />
-
+                </Box>
+              );
+            })}
           </Box>
-
-        ))}
+        )
+      )}
 
       </Card>
 
@@ -339,6 +487,128 @@ export default function Kategori() {
         </DialogTitle>
 
         <DialogContent>
+
+          <TextField
+            select
+            fullWidth
+            label="Jenis Proyek"
+            value={form.jenis_proyek}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                jenis_proyek:
+                  e.target.value
+              })
+            }
+            sx={{ mt: 2 }}
+          >
+
+            {jenisProyekList.map(
+              (item) => (
+                <MenuItem
+                  key={item}
+                  value={item}
+                >
+                  {item}
+                </MenuItem>
+              )
+            )}
+
+          </TextField>
+
+          <TextField
+            select
+            fullWidth
+            label="Bidang"
+            value={form.bidang}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                bidang:
+                  e.target.value
+              })
+            }
+            sx={{ mt: 2 }}
+          >
+
+            {bidangList.map(
+              (item) => (
+                <MenuItem
+                  key={item}
+                  value={item}
+                >
+                  {item}
+                </MenuItem>
+              )
+            )}
+
+          </TextField>
+
+          <TextField
+            select
+            fullWidth
+            label="Jenis Form"
+            value={form.jenis_form}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                jenis_form:
+                  e.target.value
+              })
+            }
+            sx={{ mt: 2 }}
+          >
+
+            {jenisFormList.map(
+              (item) => (
+                <MenuItem
+                  key={item}
+                  value={item}
+                >
+                  {item}
+                </MenuItem>
+              )
+            )}
+
+          </TextField>
+
+          <TextField
+            fullWidth
+            label="Item Pekerjaan"
+            value={form.item_pekerjaan}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                item_pekerjaan:
+                  e.target.value
+              })
+            }
+            sx={{ mt: 2 }}
+          />
+
+          <FormControlLabel
+            control={
+              <Checkbox
+
+                checked={
+                  form.is_tipikal === 1
+                }
+
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+
+                    is_tipikal:
+                      e.target.checked
+                        ? 1
+                        : 0
+                  })
+                }
+              />
+            }
+
+            label="Pekerjaan Tipikal"
+          />
 
           <TextField
             fullWidth

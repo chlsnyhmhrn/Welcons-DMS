@@ -37,9 +37,10 @@ app.use((req, res, next) => {
   const role =
     req.headers["role"];
 
+  // 🔥 fallback ambil dari local login sementara
   req.user = {
-    id_user,
-    role
+    id_user: id_user || 1,
+    role: role || "admin"
   };
 
   next();

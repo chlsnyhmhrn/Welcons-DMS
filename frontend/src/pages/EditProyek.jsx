@@ -29,7 +29,12 @@ export default function EditProyek() {
     lokasi: "",
     tanggal_mulai: "",
     status_proyek: "Aktif",
-    deskripsi: ""
+    deskripsi: "",
+
+    jenis_proyek: "",
+    jumlah_lantai: "",
+
+    bidang_pengawasan: []
   });
 
   const [loading, setLoading] = useState(true);
@@ -94,6 +99,41 @@ export default function EditProyek() {
     });
   };
 
+// ================= LIST BIDANG PENGAWASAN =================
+const bidangList = [
+  "Struktur",
+  "Arsitektur",
+  "Plumbing",
+  "Fire Fighting",
+  "AC",
+  "Elektrikal",
+  "Elektronik"
+];
+
+// ================= HANDLE CHECKLIST BIDANG =================
+const handleBidangChange = (bidang) => {
+
+  const current =
+    form.bidang_pengawasan;
+
+  // 🔥 JIKA SUDAH DIPILIH → HAPUS
+  const updated =
+    current.includes(bidang)
+
+      ? current.filter(
+          (item) =>
+            item !== bidang
+        )
+
+      // 🔥 JIKA BELUM → TAMBAH
+      : [...current, bidang];
+
+  setForm({
+    ...form,
+    bidang_pengawasan: updated
+  });
+};
+
   // ================= UPDATE =================
 const handleSubmit = async () => {
 
@@ -103,7 +143,10 @@ const handleSubmit = async () => {
     !form.nama_proyek ||
     !form.lokasi ||
     !form.tanggal_mulai ||
-    !form.status_proyek
+    !form.status_proyek ||
+    !form.jenis_proyek ||
+    !form.jumlah_lantai ||
+    form.bidang_pengawasan.length === 0
   ) {
 
     alert(
@@ -320,6 +363,89 @@ const handleSubmit = async () => {
               </MenuItem>
 
             </TextField>
+
+            {/* JENIS PROYEK */}
+            <TextField
+              select
+              fullWidth
+              label="Jenis Proyek"
+              name="jenis_proyek"
+              value={form.jenis_proyek}
+              onChange={handleChange}
+              sx={{ mb: 3 }}
+            >
+
+              <MenuItem value="Gedung">
+                Gedung
+              </MenuItem>
+
+              <MenuItem value="Rumah">
+                Rumah
+              </MenuItem>
+
+              <MenuItem value="Pondasi Bawah">
+                Pondasi Bawah
+              </MenuItem>
+
+            </TextField>
+
+            {/* JUMLAH LANTAI */}
+            <TextField
+              fullWidth
+              type="number"
+              label="Jumlah Lantai"
+              name="jumlah_lantai"
+              value={form.jumlah_lantai}
+              onChange={handleChange}
+              sx={{ mb: 3 }}
+            />
+
+            {/* BIDANG PENGAWASAN */}
+            <Box sx={{ mb: 3 }}>
+
+              <Typography
+                fontWeight="bold"
+                mb={1}
+              >
+                Bidang Pengawasan
+              </Typography>
+
+              <Box
+                display="flex"
+                flexWrap="wrap"
+                gap={1}
+              >
+
+                {bidangList.map(
+                  (bidang) => (
+
+                    <Button
+                      key={bidang}
+                      variant={
+                        form.bidang_pengawasan.includes(
+                          bidang
+                        )
+                          ? "contained"
+                          : "outlined"
+                      }
+                      onClick={() =>
+                        handleBidangChange(
+                          bidang
+                        )
+                      }
+                      sx={{
+                        borderRadius: 3,
+                        textTransform: "none"
+                      }}
+                    >
+                      {bidang}
+                    </Button>
+                  )
+                )}
+
+              </Box>
+
+            </Box>
 
             {/* DESKRIPSI */}
             <TextField

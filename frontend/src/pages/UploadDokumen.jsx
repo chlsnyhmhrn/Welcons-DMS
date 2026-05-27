@@ -27,10 +27,20 @@ export default function UploadDokumen() {
 
   const [form, setForm] = useState({
     nama_dokumen: "",
+
     id_proyek: "",
+
+    bidang: "",
+    jenis_form: "",
+
     id_kategori: "",
     item_pekerjaan: "",
+
+    lantai: "",
+
     status: "Perlu Revisi",
+
+    nomor_titik: "",
   });
 
   const [file, setFile] = useState(null);
@@ -41,40 +51,154 @@ export default function UploadDokumen() {
 
   const [kategoriList, setKategoriList] = useState([]);
 
-  // ================= FETCH DROPDOWN =================
+  const [filteredKategori, setFilteredKategori] = useState([]);
+
+ // ================= FETCH DROPDOWN =================
+useEffect(() => {
+
+  const fetchData = async () => {
+
+    try {
+
+      const proyekRes = await axios.get(
+        "http://localhost:5000/proyek"
+      );
+
+      const kategoriRes = await axios.get(
+        "http://localhost:5000/kategori"
+      );
+
+      setProyekList(
+        (proyekRes.data || []).filter(
+          (project) =>
+            project.status_proyek === "Aktif"
+        )
+      );
+
+      setKategoriList(
+        kategoriRes.data || []
+      );
+
+    } catch (err) {
+
+      console.error(err);
+    }
+  };
+
+  fetchData();
+
+}, []);
+
+// ================= FILTER KATEGORI =================
+useEffect(() => {
+
+  if (!form.id_proyek)
+    return;
+
+  const selectedProyek =
+    proyekList.find(
+      (item) =>
+        item.id_proyek ==
+        form.id_proyek
+    );
+
+  if (!selectedProyek)
+    return;
+
+  const filtered =
+    kategoriList.filter(
+      (item) =>
+
+        item.jenis_proyek ===
+          selectedProyek.jenis_proyek &&
+
+        selectedProyek.bidang_pengawasan?.includes(
+          item.bidang
+        )
+    );
+
+  setFilteredKategori(
+      filtered
+    );
+
+  }, [
+    form.id_proyek,
+    proyekList,
+    kategoriList
+  ]);
+
+    const selectedKategori =
+    kategoriList.find(
+      (item) =>
+        Number(item.id_kategori) ===
+        Number(form.id_kategori)
+    );
+
+
+  // ================= AUTO NAMA DOKUMEN =================
   useEffect(() => {
 
-    const fetchData = async () => {
+    if (
+      !form.id_proyek ||
+      !form.id_kategori
+    ) return;
 
-      try {
+    const proyek =
+      proyekList.find(
+        (item) =>
+          item.id_proyek ==
+          form.id_proyek
+      );
 
-        const proyekRes = await axios.get(
-          "http://localhost:5000/proyek"
-        );
+    const kategori =
+      kategoriList.find(
+        (item) =>
+          item.id_kategori ==
+          form.id_kategori
+      );
 
-        const kategoriRes = await axios.get(
-          "http://localhost:5000/kategori"
-        );
+    if (!proyek || !kategori)
+      return;
 
-        // 🔥 HANYA PROYEK AKTIF
-        setProyekList(
-          (proyekRes.data || []).filter(
-            (project) =>
-              project.status_proyek === "Aktif"
-          )
-        );
+    let generatedName =
+      `${kategori.jenis_form} - ${kategori.item_pekerjaan}`;
 
-        setKategoriList(kategoriRes.data || []);
+    // 🔥 TAMBAH NOMOR TITIK
+    if (
+      form.nomor_titik
+    ) {
 
-      } catch (err) {
+      generatedName +=
+        ` - Titik ${form.nomor_titik}`;
+    }
 
-        console.error(err);
-      }
-    };
+    // 🔥 TAMBAH LANTAI KALAU TIPIKAL
+    if (
+      Number(kategori.is_tipikal) === 1 &&
+      form.lantai
+    ) {
 
-    fetchData();
+      generatedName +=
+        ` - Lantai ${form.lantai}`;
+    }
 
-  }, []);
+    generatedName +=
+      ` - ${proyek.nama_proyek}`;
+
+    setForm((prev) => ({
+      ...prev,
+      nama_dokumen:
+        generatedName
+    }));
+
+  }, [
+    form.id_proyek,
+    form.id_kategori,
+    form.lantai,
+    proyekList,
+    kategoriList
+  ]);
+  
 
   // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
@@ -277,16 +401,6 @@ export default function UploadDokumen() {
 
             </Box>
 
-            {/* NAMA DOKUMEN */}
-            <TextField
-              fullWidth
-              label="Nama Dokumen"
-              name="nama_dokumen"
-              value={form.nama_dokumen}
-              onChange={handleChange}
-              sx={{ mb: 3 }}
-            />
-
             {/* PROYEK */}
             <TextField
               select
@@ -311,39 +425,252 @@ export default function UploadDokumen() {
 
             </TextField>
 
-            {/* KATEGORI */}
+            {/* ================= PILIH BIDANG ================= */}
             <TextField
               select
               fullWidth
-              label="Pilih Kategori"
-              name="id_kategori"
-              value={form.id_kategori}
-              onChange={handleChange}
+              label="Pilih Bidang"
+              value={form.bidang || ""}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+
+                  bidang:
+                    e.target.value,
+
+                  jenis_form: "",
+                  id_kategori: "",
+                  item_pekerjaan: "",
+                  lantai: ""
+                })
+              }
               sx={{ mb: 3 }}
             >
 
-              {kategoriList.map((item) => (
+              {[...new Set(
+
+                kategoriList
+
+                  .filter(
+                    (item) => {
+
+                      const proyek =
+                        proyekList.find(
+                          (p) =>
+                            p.id_proyek ==
+                            form.id_proyek
+                        );
+
+                      return (
+                        item.jenis_proyek ===
+                          proyek?.jenis_proyek &&
+
+                        proyek?.bidang_pengawasan?.includes(
+                          item.bidang
+                        )
+                      );
+                    }
+                  )
+
+                  .map(
+                    (item) =>
+                      item.bidang
+                  )
+              )].map((item) => (
 
                 <MenuItem
-                  key={item.id_kategori}
-                  value={item.id_kategori}
+                  key={item}
+                  value={item}
                 >
-                  {item.nama_kategori}
+                  {item}
                 </MenuItem>
 
               ))}
 
             </TextField>
 
-            {/* ITEM PEKERJAAN */}
-            <TextField
-              fullWidth
-              label="Item Pekerjaan"
-              name="item_pekerjaan"
-              value={form.item_pekerjaan}
-              onChange={handleChange}
-              sx={{ mb: 3 }}
-            />
+            {/* ================= PILIH JENIS FORM ================= */}
+            {form.bidang && (
+
+              <TextField
+                select
+                fullWidth
+                label="Pilih Jenis Form"
+                value={form.jenis_form || ""}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+
+                    jenis_form:
+                      e.target.value,
+
+                    id_kategori: "",
+                    item_pekerjaan: "",
+                    lantai: ""
+                  })
+                }
+                sx={{ mb: 3 }}
+              >
+
+                {[...new Set(
+
+                  kategoriList
+
+                    .filter(
+                      (item) =>
+                        item.bidang ===
+                          form.bidang
+                    )
+
+                    .map(
+                      (item) =>
+                        item.jenis_form
+                    )
+                )].map((item) => (
+
+                  <MenuItem
+                    key={item}
+                    value={item}
+                  >
+                    {item}
+                  </MenuItem>
+
+                ))}
+
+              </TextField>
+            )}
+
+            {/* ================= PILIH ITEM ================= */}
+            {form.jenis_form && (
+
+              <TextField
+                select
+                fullWidth
+                label="Pilih Item Pekerjaan"
+                value={form.id_kategori || ""}
+                onChange={(e) => {
+
+                  const selected =
+                    kategoriList.find(
+                      (item) =>
+                        item.id_kategori ==
+                        e.target.value
+                    );
+
+                  setForm({
+                    ...form,
+
+                    id_kategori:
+                      e.target.value,
+
+                    item_pekerjaan:
+                      selected?.item_pekerjaan || "",
+
+                    lantai: ""
+                  });
+                }}
+                sx={{ mb: 3 }}
+              >
+
+                {kategoriList
+
+                  .filter(
+                    (item) =>
+
+                      item.bidang ===
+                        form.bidang &&
+
+                      item.jenis_form ===
+                        form.jenis_form
+                  )
+
+                  .map((item) => (
+
+                    <MenuItem
+                      key={item.id_kategori}
+                      value={item.id_kategori}
+                    >
+                      {item.item_pekerjaan}
+                    </MenuItem>
+
+                  ))}
+
+              </TextField>
+            )}
+
+            {/* ================= PILIH LANTAI ================= */}
+            {selectedKategori &&
+            Number(selectedKategori.is_tipikal) === 1 && (
+
+                <TextField
+                  select
+                  fullWidth
+                  label="Pilih Lantai"
+                  value={form.lantai}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      lantai:
+                        e.target.value
+                    })
+                  }
+                  sx={{ mb: 3 }}
+                >
+
+                  {Array.from(
+                    {
+                      length:
+
+                        proyekList.find(
+                          (item) =>
+                            item.id_proyek ==
+                            form.id_proyek
+                        )?.jumlah_lantai || 0
+                    },
+
+                    (_, i) => (
+
+                      <MenuItem
+                        key={i + 1}
+                        value={i + 1}
+                      >
+                        Lantai {i + 1}
+                      </MenuItem>
+                    )
+                  )}
+
+                </TextField>
+              )}
+
+              {/* ================= NOMOR TITIK ================= */}
+                {selectedKategori?.jenis_form
+                  ?.toLowerCase()
+                  .includes("record") && (
+
+                  <TextField
+                    fullWidth
+                    label="Nomor Titik"
+                    value={form.nomor_titik}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+
+                        nomor_titik:
+                          e.target.value
+                      })
+                    }
+                    sx={{ mb: 3 }}
+                  />
+                )}
+
+              {/* ================= NAMA DOKUMEN ================= */}
+              <TextField
+                fullWidth
+                label="Nama Dokumen"
+                value={form.nama_dokumen}
+                disabled
+                sx={{ mb: 3 }}
+              />
 
             {/* STATUS */}
             <TextField

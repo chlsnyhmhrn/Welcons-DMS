@@ -46,7 +46,12 @@ export const login = async (req, res) => {
 
     return res.json({
       success: true,
-      user,
+      user: {
+        id_user: user.id_user,
+        nama_lengkap: user.nama_lengkap,
+        email: user.email,
+        role: user.role
+      }
     });
 
   } catch (err) {
