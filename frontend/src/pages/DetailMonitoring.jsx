@@ -8,6 +8,7 @@ import {
   useNavigate,
   useParams
 } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 import MainLayout from "../layout/MainLayout";
 
@@ -23,7 +24,13 @@ import {
   TextField,
   MenuItem,
   InputAdornment,
-  IconButton
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Checkbox,
+  FormControlLabel
 } from "@mui/material";
 
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
@@ -34,6 +41,8 @@ export default function DetailMonitoring() {
 
   const navigate = useNavigate();
 
+  const { user } = useAuth();
+
   const { namaProyek } = useParams();
 
   const [documents, setDocuments] = useState([]);
@@ -42,6 +51,24 @@ export default function DetailMonitoring() {
 
   const [filterKategori, setFilterKategori] =
     useState("Semua");
+
+  const [adminProyek, setAdminProyek] =
+  useState("");
+
+  const [pengawasProyek, setPengawasProyek] =
+    useState([]);
+
+  const [openTim, setOpenTim] =
+  useState(false);
+
+  const [usersList, setUsersList] =
+    useState([]);
+
+  const [selectedAdmin, setSelectedAdmin] =
+    useState("");
+
+  const [selectedPengawas, setSelectedPengawas] =
+    useState([]);
 
   // ================= FETCH =================
   const fetchDokumen = async () => {
@@ -66,7 +93,164 @@ export default function DetailMonitoring() {
 
     fetchDokumen();
 
+    fetchAssignment();
+
   }, []);
+
+    // ================= FETCH ASSIGNMENT =================
+  const fetchAssignment = async () => {
+
+    try {
+
+      const resProyek =
+        await fetch(
+          "http://localhost:5000/proyek"
+        );
+
+      const proyekList =
+        await resProyek.json();
+
+      const proyek =
+        proyekList.find(
+          (p) =>
+            p.nama_proyek ===
+            decodeURIComponent(
+              namaProyek
+            )
+        );
+
+      if (!proyek) return;
+
+      const res =
+        await fetch(
+          `http://localhost:5000/proyek/${proyek.id_proyek}/users`
+        );
+
+      const data =
+        await res.json();
+
+      const admin =
+        data.assigned.find(
+          (a) =>
+            a.role_penugasan ===
+            "admin"
+        );
+
+      const pengawas =
+        data.assigned.filter(
+          (a) =>
+            a.role_penugasan ===
+            "pengawas"
+        );
+
+      const adminUser =
+        data.users.find(
+          (u) =>
+            u.id_user ===
+            admin?.id_user
+        );
+
+      const pengawasUser =
+        data.users.filter(
+          (u) =>
+            pengawas.some(
+              (p) =>
+                p.id_user ===
+                u.id_user
+            )
+        );
+
+      setAdminProyek(
+        adminUser
+          ?.nama_lengkap ||
+          "-"
+      );
+
+      setPengawasProyek(
+        pengawasUser
+      );
+
+      setUsersList(
+        data.users
+      );
+
+      setSelectedAdmin(
+        admin?.id_user || ""
+      );
+
+      setSelectedPengawas(
+        pengawas.map(
+          (p) => p.id_user
+        )
+      );
+
+    } catch (err) {
+
+      console.log(err);
+    }
+  };
+
+  const saveAssignment =
+  async () => {
+
+    try {
+
+      const resProyek =
+        await fetch(
+          "http://localhost:5000/proyek"
+        );
+
+      const proyekList =
+        await resProyek.json();
+
+      const proyek =
+        proyekList.find(
+          (p) =>
+            p.nama_proyek ===
+            decodeURIComponent(
+              namaProyek
+            )
+        );
+
+      if (!proyek) return;
+
+      await fetch(
+        `http://localhost:5000/proyek/${proyek.id_proyek}/users`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            admin:
+              selectedAdmin,
+
+            pengawas:
+              selectedPengawas
+          })
+        }
+      );
+
+      await fetchAssignment();
+
+      setOpenTim(false);
+
+      alert(
+        "Tim proyek berhasil diperbarui"
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+      alert(
+        "Gagal menyimpan tim proyek"
+      );
+    }
+  };
 
   // ================= FILTER PROYEK =================
   const filteredDocs = useMemo(() => {
@@ -116,7 +300,6 @@ export default function DetailMonitoring() {
 
       grouped[key].total_submit += 1;
 
-      // 🔥 AMBIL VERSI TERBARU
       if (
         doc.versi >
         grouped[key].versi
@@ -203,52 +386,64 @@ return (
       {/* ================= HEADER ================= */}
       <Box
         display="flex"
+        justifyContent="space-between"
         alignItems="center"
-        gap={1}
         mb={2}
         flexShrink={0}
       >
-
-        <IconButton
-          onClick={() =>
-            navigate(-1)
-          }
-        >
-          <ArrowBackIosNewIcon />
-        </IconButton>
-
-        <Box>
-
-          <Typography
-            variant="h5"
-            fontWeight="bold"
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={1}
           >
-            {decodeURIComponent(
-              namaProyek
-            )}
-          </Typography>
 
-        </Box>
+            <IconButton
+              onClick={() =>
+                navigate(-1)
+              }
+            >
+              <ArrowBackIosNewIcon />
+            </IconButton>
+
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+            >
+              {decodeURIComponent(
+                namaProyek
+              )}
+            </Typography>
+
+          </Box>
 
       </Box>
 
-      {/* ================= SUMMARY ================= */}
-      <Grid
-        container
-        spacing={2}
+      {/* ================= SUMMARY + TIM PROYEK (1 BARIS) ================= */}
+      <Box
         sx={{
+          display: "flex",
+          alignItems: "stretch",
+          gap: 2,
           mb: 2,
           flexShrink: 0
         }}
       >
 
-        {/* TOTAL PEKERJAAN */}
-        <Grid item xs={12} sm={6} md={2}>
+        {/* SUMMARY CARDS (KIRI) */}
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            flex: 3
+          }}
+        >
 
+          {/* TOTAL PEKERJAAN */}
           <Card
             sx={{
               borderRadius: 4,
-              boxShadow: 2
+              boxShadow: 2,
+              flex: 1
             }}
           >
 
@@ -278,15 +473,12 @@ return (
 
           </Card>
 
-        </Grid>
-
-        {/* TOTAL SUBMIT */}
-        <Grid item xs={12} sm={6} md={2}>
-
+          {/* TOTAL SUBMIT */}
           <Card
             sx={{
               borderRadius: 4,
-              boxShadow: 2
+              boxShadow: 2,
+              flex: 1
             }}
           >
 
@@ -316,15 +508,12 @@ return (
 
           </Card>
 
-        </Grid>
-
-        {/* FINAL */}
-        <Grid item xs={12} sm={6} md={2}>
-
+          {/* FINAL */}
           <Card
             sx={{
               borderRadius: 4,
-              boxShadow: 2
+              boxShadow: 2,
+              flex: 1
             }}
           >
 
@@ -360,9 +549,75 @@ return (
 
           </Card>
 
-        </Grid>
+        </Box>
 
-      </Grid>
+        {/* TIM PROYEK (KANAN) */}
+          <Card
+            sx={{
+              borderRadius: 4,
+              boxShadow: 2,
+              flex: 1
+            }}
+          >
+
+          <CardContent
+            sx={{
+              py: 1,
+              px: 2.5
+            }}
+          >
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+            >
+              Tim Proyek
+            </Typography>
+
+            <Typography
+              fontWeight="bold"
+              sx={{ mt: 0.5 }}
+            >
+              👤 {adminProyek}
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 0.5 }}
+            >
+              👷 {
+                pengawasProyek.length > 0
+                  ? pengawasProyek
+                      .map(
+                        (p) =>
+                          p.nama_lengkap
+                      )
+                      .join(", ")
+                  : "Belum ada pengawas"
+              }
+            </Typography>
+
+            {user?.role === "direktur" && (
+
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() =>
+                setOpenTim(true)
+              }
+              sx={{ mt: 1 }}
+            >
+              Kelola Tim
+            </Button>
+
+            )}
+
+          </CardContent>
+
+        </Card>
+
+      </Box>
 
       {/* ================= SEARCH ================= */}
       <Card
@@ -588,6 +843,129 @@ return (
       </Box>
 
     </Box>
+
+        <Dialog
+      open={openTim}
+      onClose={() =>
+        setOpenTim(false)
+      }
+      maxWidth="sm"
+      fullWidth
+    >
+
+      <DialogTitle>
+        Kelola Tim Proyek
+      </DialogTitle>
+
+      <DialogContent>
+
+        <TextField
+          select
+          fullWidth
+          label="Admin Proyek"
+          value={selectedAdmin}
+          onChange={(e) =>
+            setSelectedAdmin(
+              e.target.value
+            )
+          }
+          sx={{ mt: 1, mb: 3 }}
+        >
+
+          {usersList
+            .filter(
+              (u) =>
+                u.role === "admin"
+            )
+            .map((user) => (
+
+              <MenuItem
+                key={user.id_user}
+                value={user.id_user}
+              >
+                {user.nama_lengkap}
+              </MenuItem>
+
+            ))}
+
+        </TextField>
+
+        <Typography
+          fontWeight="bold"
+          mb={1}
+        >
+          Pengawas
+        </Typography>
+
+        {usersList
+          .filter(
+            (u) =>
+              u.role === "pengawas"
+          )
+          .map((user) => (
+
+            <FormControlLabel
+              key={user.id_user}
+              control={
+                <Checkbox
+                  checked={
+                    selectedPengawas.includes(
+                      user.id_user
+                    )
+                  }
+                  onChange={(e) => {
+
+                    if (
+                      e.target.checked
+                    ) {
+
+                      setSelectedPengawas([
+                        ...selectedPengawas,
+                        user.id_user
+                      ]);
+
+                    } else {
+
+                      setSelectedPengawas(
+                        selectedPengawas.filter(
+                          (id) =>
+                            id !==
+                            user.id_user
+                        )
+                      );
+                    }
+                  }}
+                />
+              }
+              label={
+                user.nama_lengkap
+              }
+            />
+
+          ))}
+
+      </DialogContent>
+
+      <DialogActions>
+
+        <Button
+          onClick={() =>
+            setOpenTim(false)
+          }
+        >
+          Batal
+        </Button>
+
+        <Button
+          variant="contained"
+          onClick={saveAssignment}
+        >
+          Simpan
+        </Button>
+
+      </DialogActions>
+
+    </Dialog>
 
   </MainLayout>
 );

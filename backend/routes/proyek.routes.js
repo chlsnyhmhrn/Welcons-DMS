@@ -5,7 +5,12 @@ import {
   getProyek,
   tambahProyek,
   updateProyek,
-  deleteProyek
+  deleteProyek,
+
+  // 🔥 ASSIGN USER
+  getAssignProyek,
+  saveAssignProyek
+
 } from "../controllers/proyek.controller.js";
 
 // 🔥 GET semua proyek
@@ -19,5 +24,11 @@ router.put("/:id", updateProyek);
 
 // 🔥 DELETE proyek (PAKAI CONTROLLER)
 router.delete("/:id", deleteProyek);
+
+// 🔥 GET ASSIGN USER PROYEK
+router.get("/:id/users", getAssignProyek);
+
+// 🔥 SIMPAN ASSIGN USER PROYEK
+router.post("/:id/users", saveAssignProyek);
 
 export default router;

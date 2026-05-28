@@ -261,6 +261,133 @@ export const updateProyek = async (req, res) => {
   }
 };
 
+// ================= GET ASSIGN USER PROYEK =================
+export const getAssignProyek = async (req, res) => {
+
+  try {
+
+    const { id } = req.params;
+
+    // 🔥 SEMUA USER
+    const [users] = await db.query(`
+      SELECT
+        id_user,
+        nama_lengkap,
+        role
+      FROM users
+      ORDER BY nama_lengkap ASC
+    `);
+
+  // 🔥 USER YANG SUDAH DITUGASKAN
+  const [assigned] = await db.query(`
+    SELECT
+      id_user,
+      role_penugasan
+    FROM user_proyek
+    WHERE id_proyek = ?
+    AND role_penugasan IS NOT NULL
+  `, [id]);
+
+    res.json({
+      users,
+      assigned
+    });
+
+  } catch (error) {
+
+    console.error(
+      "GET ASSIGN ERROR:",
+      error
+    );
+
+    res.status(500).json({
+      message:
+        "Gagal mengambil data assignment"
+    });
+  }
+};
+
+// ================= SIMPAN ASSIGN USER PROYEK =================
+export const saveAssignProyek = async (req, res) => {
+
+  try {
+
+    const { id } =
+      req.params;
+
+    const {
+      admin,
+      pengawas
+    } = req.body;
+
+    // 🔥 HAPUS ASSIGNMENT LAMA
+    await db.query(`
+      DELETE FROM user_proyek
+      WHERE id_proyek = ?
+    `, [id]);
+
+    // 🔥 SIMPAN ADMIN
+    if (admin) {
+
+      await db.query(`
+        INSERT INTO user_proyek
+        (
+          id_user,
+          id_proyek,
+          role_penugasan
+        )
+        VALUES (?, ?, ?)
+      `, [
+        admin,
+        id,
+        "admin"
+      ]);
+    }
+
+    // 🔥 SIMPAN PENGAWAS
+    if (
+      Array.isArray(
+        pengawas
+      )
+    ) {
+
+      for (const idUser of pengawas) {
+
+        await db.query(`
+          INSERT INTO user_proyek
+          (
+            id_user,
+            id_proyek,
+            role_penugasan
+          )
+          VALUES (?, ?, ?)
+        `, [
+          idUser,
+          id,
+          "pengawas"
+        ]);
+      }
+    }
+
+    res.json({
+      message:
+        "Assignment berhasil disimpan"
+    });
+
+  } catch (error) {
+
+    console.error(
+      "SAVE ASSIGN ERROR:",
+      error
+    );
+
+    res.status(500).json({
+      message:
+        "Gagal menyimpan assignment"
+    });
+  }
+};
+
 // ================= DELETE PROYEK =================
 export const deleteProyek = async (req, res) => {
 

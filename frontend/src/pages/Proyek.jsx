@@ -240,18 +240,6 @@ export default function Proyek() {
                     <EditOutlinedIcon />
                   </IconButton>
 
-                  {/* ASSIGN PROYEK */}
-                  <IconButton
-                    color="success"
-                    onClick={() =>
-                      navigate(
-                        `/assign-proyek/${item.id_proyek}`
-                      )
-                    }
-                  >
-                    <GroupOutlinedIcon />
-                  </IconButton>
-
                   {/* DELETE */}
                   <IconButton
                     color="error"

@@ -80,6 +80,13 @@ export default function Users() {
       );
   };
 
+  // ================= LOAD DATA =================
+  useEffect(() => {
+
+    fetchUsers();
+
+  }, []);
+
   // ================= ADD USER =================
   const handleAdd = async () => {
 

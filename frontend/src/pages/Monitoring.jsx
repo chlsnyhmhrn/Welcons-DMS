@@ -27,6 +27,8 @@ export default function Monitoring() {
 
   const [documents, setDocuments] = useState([]);
 
+  const [proyek, setProyek] = useState([]);
+
   // ================= PREVENT BLANK =================
   if (loading) return null;
 
@@ -61,50 +63,76 @@ export default function Monitoring() {
   };
 
   useEffect(() => {
+
     fetchDokumen();
+
+    fetchProyek();
+
   }, []);
 
-  // ================= GROUPING PROYEK =================
-  const proyekMonitoring = useMemo(() => {
+  // ================= FETCH PROYEK =================
+    const fetchProyek = async () => {
 
-    const grouped = {};
+      try {
 
-    documents.forEach((doc) => {
+        const res = await fetch(
+          "http://localhost:5000/proyek"
+        );
 
-      const proyek = doc.nama_proyek || "Tanpa Proyek";
+        const data =
+          await res.json();
 
-      if (!grouped[proyek]) {
+        setProyek(data);
 
-        grouped[proyek] = {
-          nama_proyek: proyek,
-          total_dokumen: 0,
-          total_final: 0,
-          total_revisi: 0,
-          total_obsolete: 0,
-          dokumen: []
+      } catch (err) {
+
+        console.log(err);
+      }
+    };
+
+  // ================= MONITORING PROYEK =================
+    const proyekMonitoring = useMemo(() => {
+
+      return proyek.map((p) => {
+
+        const dokumenProyek =
+          documents.filter(
+            (d) =>
+              d.id_proyek ===
+              p.id_proyek
+          );
+
+        return {
+
+          ...p,
+
+          total_dokumen:
+            dokumenProyek.length,
+
+          total_final:
+            dokumenProyek.filter(
+              (d) =>
+                d.status === "Final"
+            ).length,
+
+          total_revisi:
+            dokumenProyek.filter(
+              (d) =>
+                d.status ===
+                "Perlu Revisi"
+            ).length,
+
+          total_obsolete:
+            dokumenProyek.filter(
+              (d) =>
+                d.status ===
+                "Obsolete"
+            ).length
         };
-      }
 
-      grouped[proyek].total_dokumen += 1;
+      });
 
-      if (doc.status === "Final") {
-        grouped[proyek].total_final += 1;
-      }
-
-      if (doc.status === "Perlu Revisi") {
-        grouped[proyek].total_revisi += 1;
-      }
-
-      if (doc.status === "Obsolete") {
-        grouped[proyek].total_obsolete += 1;
-      }
-
-      grouped[proyek].dokumen.push(doc);
-    });
-
-    return Object.values(grouped);
-
-  }, [documents]);
+    }, [proyek, documents]);
 
   // ================= UI =================
   return (
