@@ -30,8 +30,6 @@ export default function Users() {
 
   const [users, setUsers] = useState([]);
 
-  const [proyek, setProyek] = useState([]);
-
   const [open, setOpen] = useState(false);
 
   const [editId, setEditId] =
@@ -42,7 +40,6 @@ export default function Users() {
     email: "",
     password: "",
     role: "pengawas",
-    id_proyek: ""
   });
 
   // ================= PREVENT BLANK =================
@@ -51,7 +48,7 @@ export default function Users() {
   if (!user) return null;
 
   // ================= ROLE ACCESS =================
-  if (user.role !== "direktur") {
+  if (user.role !== "admin") {
 
     return (
       <MainLayout title="Kelola User">
@@ -82,30 +79,6 @@ export default function Users() {
         console.log(err)
       );
   };
-
-  // ================= GET PROYEK =================
-  const fetchProyek = () => {
-
-    fetch("http://localhost:5000/proyek")
-
-      .then((res) => res.json())
-
-      .then((data) =>
-        setProyek(data)
-      )
-
-      .catch((err) =>
-        console.log(err)
-      );
-  };
-
-  useEffect(() => {
-
-    fetchUsers();
-
-    fetchProyek();
-
-  }, []);
 
   // ================= ADD USER =================
   const handleAdd = async () => {
@@ -139,19 +112,6 @@ export default function Users() {
       return;
     }
 
-    // ================= VALIDASI PROYEK PENGAWAS =================
-    if (
-      form.role === "pengawas" &&
-      !form.id_proyek
-    ) {
-
-      alert(
-        "Pilih proyek pengawas"
-      );
-
-      return;
-    }
-
     try {
 
       await fetch(
@@ -172,8 +132,7 @@ export default function Users() {
         nama_lengkap: "",
         email: "",
         password: "",
-        role: "pengawas",
-        id_proyek: ""
+        role: "pengawas"
       });
 
       setOpen(false);
@@ -195,21 +154,20 @@ export default function Users() {
       nama_lengkap:
         u.nama_lengkap,
 
-      email: u.email,
+      email:
+        u.email,
 
       password: "",
 
-      role: u.role,
-
-      id_proyek:
-        u.id_proyek || ""
+      role:
+        u.role
     });
 
     setOpen(true);
   };
 
   // ================= UPDATE USER =================
-    const handleUpdate = async () => {
+  const handleUpdate = async () => {
 
     // ================= VALIDATION =================
     if (
@@ -239,19 +197,6 @@ export default function Users() {
       return;
     }
 
-    // ================= VALIDASI PROYEK PENGAWAS =================
-    if (
-      form.role === "pengawas" &&
-      !form.id_proyek
-    ) {
-
-      alert(
-        "Pilih proyek pengawas"
-      );
-
-      return;
-    }
-
     try {
 
       await fetch(
@@ -276,8 +221,7 @@ export default function Users() {
         nama_lengkap: "",
         email: "",
         password: "",
-        role: "pengawas",
-        id_proyek: ""
+        role: "pengawas"
       });
 
       fetchUsers();
@@ -356,7 +300,6 @@ export default function Users() {
                 email: "",
                 password: "",
                 role: "pengawas",
-                id_proyek: ""
               });
 
               setOpen(true);
@@ -423,19 +366,6 @@ export default function Users() {
                     size="small"
                     color="primary"
                   />
-
-                  {/* ================= PROYEK PENGAWAS ================= */}
-                  {u.role === "pengawas" &&
-                    u.nama_proyek && (
-
-                    <Chip
-                      label={u.nama_proyek}
-                      size="small"
-                      color="success"
-                      variant="outlined"
-                    />
-
-                  )}
 
                 </Box>
 
@@ -568,40 +498,6 @@ export default function Users() {
             </MenuItem>
 
           </TextField>
-
-          {/* ================= PROYEK ================= */}
-          {form.role ===
-            "pengawas" && (
-
-            <TextField
-              select
-              fullWidth
-              label="Pilih Proyek"
-              sx={{ mt: 2 }}
-              value={form.id_proyek}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  id_proyek:
-                    e.target.value
-                })
-              }
-            >
-
-              {proyek.map((p) => (
-
-                <MenuItem
-                  key={p.id_proyek}
-                  value={p.id_proyek}
-                >
-                  {p.nama_proyek}
-                </MenuItem>
-
-              ))}
-
-            </TextField>
-
-          )}
 
         </DialogContent>
 

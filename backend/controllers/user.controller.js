@@ -7,23 +7,13 @@ export const getUsers = async (req, res) => {
   try {
 
     const sql = `
-      SELECT 
-        u.id_user,
-        u.nama_lengkap,
-        u.email,
-        u.role,
-        up.id_proyek,
-        p.nama_proyek
-
-      FROM users u
-
-      LEFT JOIN user_proyek up
-      ON u.id_user = up.id_user
-
-      LEFT JOIN proyek p
-      ON up.id_proyek = p.id_proyek
-
-      ORDER BY u.id_user DESC
+      SELECT
+        id_user,
+        nama_lengkap,
+        email,
+        role
+      FROM users
+      ORDER BY id_user DESC
     `;
 
     const [rows] = await db.query(sql);
@@ -32,10 +22,14 @@ export const getUsers = async (req, res) => {
 
   } catch (err) {
 
-    console.error("ERROR GET USERS:", err);
+    console.error(
+      "ERROR GET USERS:",
+      err
+    );
 
     res.status(500).json({
-      message: "Gagal mengambil data user"
+      message:
+        "Gagal mengambil data user"
     });
   }
 };
@@ -49,8 +43,7 @@ export const createUser = async (req, res) => {
       nama_lengkap,
       email,
       password,
-      role,
-      id_proyek
+      role
     } = req.body;
 
     // ================= HASH PASSWORD =================
@@ -61,42 +54,39 @@ export const createUser = async (req, res) => {
       );
 
     // ================= INSERT USER =================
-    const sql =
-      "INSERT INTO users (nama_lengkap, email, password, role) VALUES (?, ?, ?, ?)";
+    const sql = `
+      INSERT INTO users
+      (
+        nama_lengkap,
+        email,
+        password,
+        role
+      )
+      VALUES (?, ?, ?, ?)
+    `;
 
-    const [result] = await db.query(sql, [
+    await db.query(sql, [
       nama_lengkap,
       email,
       hashedPassword,
       role
     ]);
 
-    // ================= INSERT USER_PROYEK =================
-    if (
-      role === "pengawas" &&
-      id_proyek
-    ) {
-
-      await db.query(`
-        INSERT INTO user_proyek
-        (id_user, id_proyek)
-        VALUES (?, ?)
-      `, [
-        result.insertId,
-        id_proyek
-      ]);
-    }
-
     res.json({
-      message: "User berhasil ditambahkan"
+      message:
+        "User berhasil ditambahkan"
     });
 
   } catch (err) {
 
-    console.error("ERROR CREATE USER:", err);
+    console.error(
+      "ERROR CREATE USER:",
+      err
+    );
 
     res.status(500).json({
-      message: "Gagal menambahkan user"
+      message:
+        "Gagal menambahkan user"
     });
   }
 };
@@ -106,18 +96,24 @@ export const updateUser = async (req, res) => {
 
   try {
 
-    const { id } = req.params;
+    const { id } =
+      req.params;
 
     const {
       nama_lengkap,
       email,
-      role,
-      id_proyek
+      role
     } = req.body;
 
     // ================= UPDATE USER =================
-    const sql =
-      "UPDATE users SET nama_lengkap=?, email=?, role=? WHERE id_user=?";
+    const sql = `
+      UPDATE users
+      SET
+        nama_lengkap = ?,
+        email = ?,
+        role = ?
+      WHERE id_user = ?
+    `;
 
     await db.query(sql, [
       nama_lengkap,
@@ -126,38 +122,21 @@ export const updateUser = async (req, res) => {
       id
     ]);
 
-    // ================= DELETE RELASI LAMA =================
-    await db.query(`
-      DELETE FROM user_proyek
-      WHERE id_user = ?
-    `, [id]);
-
-    // ================= INSERT RELASI BARU =================
-    if (
-      role === "pengawas" &&
-      id_proyek
-    ) {
-
-      await db.query(`
-        INSERT INTO user_proyek
-        (id_user, id_proyek)
-        VALUES (?, ?)
-      `, [
-        id,
-        id_proyek
-      ]);
-    }
-
     res.json({
-      message: "User berhasil diupdate"
+      message:
+        "User berhasil diupdate"
     });
 
   } catch (err) {
 
-    console.error("ERROR UPDATE USER:", err);
+    console.error(
+      "ERROR UPDATE USER:",
+      err
+    );
 
     res.status(500).json({
-      message: "Gagal update user"
+      message:
+        "Gagal update user"
     });
   }
 };
@@ -167,30 +146,42 @@ export const deleteUser = async (req, res) => {
 
   try {
 
-    const { id } = req.params;
+    const { id } =
+      req.params;
 
-    // ================= DELETE RELASI =================
-    await db.query(`
+    // ================= DELETE RELASI USER PROYEK =================
+    await db.query(
+      `
       DELETE FROM user_proyek
       WHERE id_user = ?
-    `, [id]);
+      `,
+      [id]
+    );
 
     // ================= DELETE USER =================
-    const sql =
-      "DELETE FROM users WHERE id_user=?";
-
-    await db.query(sql, [id]);
+    await db.query(
+      `
+      DELETE FROM users
+      WHERE id_user = ?
+      `,
+      [id]
+    );
 
     res.json({
-      message: "User berhasil dihapus"
+      message:
+        "User berhasil dihapus"
     });
 
   } catch (err) {
 
-    console.error("ERROR DELETE USER:", err);
+    console.error(
+      "ERROR DELETE USER:",
+      err
+    );
 
     res.status(500).json({
-      message: "Gagal hapus user"
+      message:
+        "Gagal hapus user"
     });
   }
 };

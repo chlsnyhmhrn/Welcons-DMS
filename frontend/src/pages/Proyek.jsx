@@ -14,6 +14,7 @@ import {
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 
 import { useNavigate } from "react-router-dom";
 
@@ -237,6 +238,18 @@ export default function Proyek() {
                     }
                   >
                     <EditOutlinedIcon />
+                  </IconButton>
+
+                  {/* ASSIGN PROYEK */}
+                  <IconButton
+                    color="success"
+                    onClick={() =>
+                      navigate(
+                        `/assign-proyek/${item.id_proyek}`
+                      )
+                    }
+                  >
+                    <GroupOutlinedIcon />
                   </IconButton>
 
                   {/* DELETE */}

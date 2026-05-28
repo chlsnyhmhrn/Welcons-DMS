@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import UploadDokumen from "./pages/UploadDokumen";
 import TambahProyek from "./pages/TambahProyek";
 import EditProyek from "./pages/EditProyek";
+import AssignProyek from "./pages/AssignProyek";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -136,6 +137,16 @@ export default function App() {
         }
       />
 
+      {/*// ================= ASSIGN USER PROYEK =================*/}
+      <Route
+        path="/assign-proyek/:id"
+        element={
+          <ProtectedRoute>
+            <AssignProyek />
+          </ProtectedRoute>
+        }
+      />
+
       {/* ================= KATEGORI ================= */}
       <Route
         path="/kategori"
@@ -163,5 +174,6 @@ export default function App() {
       />
 
     </Routes>
+    
   );
 }
