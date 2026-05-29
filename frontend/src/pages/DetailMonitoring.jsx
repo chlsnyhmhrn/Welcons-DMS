@@ -36,6 +36,10 @@ import {
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 
 export default function DetailMonitoring() {
 
@@ -449,25 +453,51 @@ return (
 
             <CardContent
               sx={{
-                py: 1,
-                px: 2.5
+                width: "100%",
+                py: 2
               }}
             >
 
-              <Typography
-                variant="body2"
-                color="text.secondary"
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={2}
               >
-                Total Pekerjaan
-              </Typography>
 
-              <Typography
-                variant="h5"
-                fontWeight="bold"
-                sx={{ mt: 0.5 }}
-              >
-                {pekerjaanList.length}
-              </Typography>
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 3,
+                    bgcolor: "#E3F2FD",
+                    color: "#1565C0",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}
+                >
+                  <AssignmentOutlinedIcon />
+                </Box>
+
+                <Box>
+
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                  >
+                    Total Pekerjaan
+                  </Typography>
+
+                  <Typography
+                    variant="h5"
+                    fontWeight="bold"
+                  >
+                    {pekerjaanList.length}
+                  </Typography>
+
+                </Box>
+
+              </Box>
 
             </CardContent>
 
@@ -482,29 +512,55 @@ return (
             }}
           >
 
-            <CardContent
-              sx={{
-                py: 1,
-                px: 2.5
-              }}
+          <CardContent
+            sx={{
+              width: "100%",
+              py: 2
+            }}
+          >
+
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={2}
             >
 
-              <Typography
-                variant="body2"
-                color="text.secondary"
+              <Box
+                sx={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 3,
+                  bgcolor: "#F3E5F5",
+                  color: "#6A1B9A",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
               >
-                Total Submit
-              </Typography>
+                <UploadFileOutlinedIcon />
+              </Box>
 
-              <Typography
-                variant="h5"
-                fontWeight="bold"
-                sx={{ mt: 0.5 }}
-              >
-                {filteredDocs.length}
-              </Typography>
+              <Box>
 
-            </CardContent>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                >
+                  Total Submit
+                </Typography>
+
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                >
+                  {filteredDocs.length}
+                </Typography>
+
+              </Box>
+
+            </Box>
+
+          </CardContent>
 
           </Card>
 
@@ -517,105 +573,162 @@ return (
             }}
           >
 
-            <CardContent
-              sx={{
-                py: 1,
-                px: 2.5
-              }}
+           <CardContent
+            sx={{
+              width: "100%",
+              py: 2
+            }}
+          >
+
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={2}
             >
 
-              <Typography
-                variant="body2"
-                color="text.secondary"
+              <Box
+                sx={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 3,
+                  bgcolor: "#E8F5E9",
+                  color: "#2E7D32",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
               >
-                Dokumen Final
-              </Typography>
+                <CheckCircleOutlineIcon />
+              </Box>
 
-              <Typography
-                variant="h5"
-                fontWeight="bold"
-                sx={{ mt: 0.5 }}
-              >
-                {
-                  pekerjaanList.filter(
-                    (d) =>
-                      d.status ===
-                      "Final"
-                  ).length
-                }
-              </Typography>
+              <Box>
 
-            </CardContent>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                >
+                  Dokumen Final
+                </Typography>
+
+                <Typography
+                  variant="h5"
+                  fontWeight="bold"
+                >
+                  {
+                    pekerjaanList.filter(
+                      (d) =>
+                        d.status === "Final"
+                    ).length
+                  }
+                </Typography>
+
+              </Box>
+
+            </Box>
+
+          </CardContent>
 
           </Card>
 
         </Box>
 
-        {/* TIM PROYEK (KANAN) */}
-          <Card
+{/* TIM PROYEK (KANAN) */}
+<Card
+  sx={{
+    borderRadius: 4,
+    boxShadow: 2,
+    flex: 1
+  }}
+>
+
+  <CardContent
+    sx={{
+      width: "100%",
+      py: 2
+    }}
+  >
+
+    <Box
+      display="flex"
+      gap={2}
+    >
+
+      <Box
+        sx={{
+          width: 56,
+          height: 56,
+          borderRadius: 3,
+          bgcolor: "#FFF3E0",
+          color: "#ED6C02",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0
+        }}
+      >
+        <GroupOutlinedIcon />
+      </Box>
+
+      <Box sx={{ flex: 1 }}>
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+        >
+          Tim Proyek
+        </Typography>
+
+        <Typography
+          fontWeight="bold"
+        >
+          Admin: {adminProyek || "-"}
+        </Typography>
+
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{
+            display: "block",
+            mb: 1
+          }}
+        >
+          Pengawas: {
+            pengawasProyek.length > 0
+              ? pengawasProyek
+                  .map(
+                    (p) =>
+                      p.nama_lengkap
+                  )
+                  .join(", ")
+              : "-"
+          }
+        </Typography>
+
+        {user?.role === "direktur" && (
+
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() =>
+              setOpenTim(true)
+            }
             sx={{
-              borderRadius: 4,
-              boxShadow: 2,
-              flex: 1
+              mt: 1,
+              textTransform: "none"
             }}
           >
+            Kelola Tim
+          </Button>
 
-          <CardContent
-            sx={{
-              py: 1,
-              px: 2.5
-            }}
-          >
+        )}
 
-            <Typography
-              variant="body2"
-              color="text.secondary"
-            >
-              Tim Proyek
-            </Typography>
+      </Box>
 
-            <Typography
-              fontWeight="bold"
-              sx={{ mt: 0.5 }}
-            >
-              👤 {adminProyek}
-            </Typography>
+    </Box>
 
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mt: 0.5 }}
-            >
-              👷 {
-                pengawasProyek.length > 0
-                  ? pengawasProyek
-                      .map(
-                        (p) =>
-                          p.nama_lengkap
-                      )
-                      .join(", ")
-                  : "Belum ada pengawas"
-              }
-            </Typography>
+  </CardContent>
 
-            {user?.role === "direktur" && (
-
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() =>
-                setOpenTim(true)
-              }
-              sx={{ mt: 1 }}
-            >
-              Kelola Tim
-            </Button>
-
-            )}
-
-          </CardContent>
-
-        </Card>
+</Card>
 
       </Box>
 
