@@ -68,11 +68,48 @@ useEffect(() => {
         "http://localhost:5000/kategori"
       );
 
-      setProyekList(
+      let proyekAktif =
         (proyekRes.data || []).filter(
           (project) =>
             project.status_proyek === "Aktif"
-        )
+        );
+
+      // 🔥 DIREKTUR BOLEH SEMUA
+      if (user?.role !== "direktur") {
+
+        const filteredProyek = [];
+
+        for (const proyek of proyekAktif) {
+
+          const assignRes =
+            await axios.get(
+              `http://localhost:5000/proyek/${proyek.id_proyek}/users`
+            );
+
+          const assigned =
+            assignRes.data.assigned || [];
+
+          const isAssigned =
+            assigned.some(
+              (item) =>
+                item.id_user ===
+                user.id_user
+            );
+
+          if (isAssigned) {
+
+            filteredProyek.push(
+              proyek
+            );
+          }
+        }
+
+        proyekAktif =
+          filteredProyek;
+      }
+
+      setProyekList(
+        proyekAktif
       );
 
       setKategoriList(

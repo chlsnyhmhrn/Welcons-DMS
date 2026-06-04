@@ -93,9 +93,74 @@ export default function DetailMonitoring() {
     }
   };
 
+  // ================= CEK AKSES PENGAWAS =================
+  const cekAkses = async () => {
+
+    try {
+
+      // ADMIN DAN DIREKTUR BEBAS
+      if (
+        user.role === "admin" ||
+        user.role === "direktur"
+      ) {
+        return;
+      }
+
+      const res = await fetch(
+        "http://localhost:5000/proyek"
+      );
+
+      const proyekList =
+        await res.json();
+
+      const proyek =
+        proyekList.find(
+          (p) =>
+            p.nama_proyek ===
+            decodeURIComponent(
+              namaProyek
+            )
+        );
+
+      if (!proyek) return;
+
+      const resAssign =
+        await fetch(
+          `http://localhost:5000/proyek/${proyek.id_proyek}/users`
+        );
+
+      const data =
+        await resAssign.json();
+
+      const assigned =
+        data.assigned.some(
+          (item) =>
+            item.id_user ===
+            user.id_user
+        );
+
+      if (!assigned) {
+
+        alert(
+          "Anda tidak memiliki akses ke proyek ini"
+        );
+
+        navigate(
+          "/monitoring"
+        );
+      }
+
+    } catch (err) {
+
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
 
     fetchDokumen();
+
+    cekAkses();
 
     fetchAssignment();
 

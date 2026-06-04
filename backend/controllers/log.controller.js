@@ -29,8 +29,14 @@ export const getLogAktivitas = async (req, res) => {
 
     let values = [];
 
-    // ================= FILTER PENGAWAS =================
-    if (req.user?.role === "pengawas") {
+    // ================= FILTER ROLE =================
+    const role = req.headers.role;
+    const id_user = req.headers.id_user;
+
+    if (
+      role === "pengawas" ||
+      role === "admin"
+    ) {
 
       query += `
         INNER JOIN user_proyek up
@@ -39,7 +45,7 @@ export const getLogAktivitas = async (req, res) => {
         WHERE up.id_user = ?
       `;
 
-      values.push(req.user.id_user);
+      values.push(id_user);
     }
 
     // ================= ORDER =================
