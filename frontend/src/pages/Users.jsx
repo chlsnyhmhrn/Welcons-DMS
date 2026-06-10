@@ -121,19 +121,20 @@ export default function Users() {
 
     try {
 
-      await fetch(
-        "http://localhost:5000/users",
-        {
-          method: "POST",
+    await fetch(
+      "http://localhost:5000/users",
+      {
+        method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+        headers: {
+          "Content-Type": "application/json",
+          id_user: user.id_user,
+          role: user.role
+        },
 
-          body: JSON.stringify(form)
-        }
-      );
+        body: JSON.stringify(form)
+      }
+    );
 
       setForm({
         nama_lengkap: "",
@@ -206,19 +207,20 @@ export default function Users() {
 
     try {
 
-      await fetch(
-        `http://localhost:5000/users/${editId}`,
-        {
-          method: "PUT",
+    await fetch(
+      `http://localhost:5000/users/${editId}`,
+      {
+        method: "PUT",
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+        headers: {
+          "Content-Type": "application/json",
+          id_user: user.id_user,
+          role: user.role
+        },
 
-          body: JSON.stringify(form)
-        }
-      );
+        body: JSON.stringify(form)
+      }
+    );
 
       setOpen(false);
 
@@ -251,12 +253,17 @@ export default function Users() {
 
     try {
 
-      await fetch(
-        `http://localhost:5000/users/${id}`,
-        {
-          method: "DELETE"
+    await fetch(
+      `http://localhost:5000/users/${id}`,
+      {
+        method: "DELETE",
+
+        headers: {
+          id_user: user.id_user,
+          role: user.role
         }
-      );
+      }
+    );
 
       fetchUsers();
 

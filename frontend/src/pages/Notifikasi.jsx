@@ -115,15 +115,26 @@ export default function Notifikasi() {
   // ================= ICON =================
   const getIcon = (aktivitas) => {
 
-    if (
-      aktivitas?.includes("Upload")
-    ) {
+    if (aktivitas?.includes("Upload")) {
       return (
         <DescriptionOutlinedIcon color="primary" />
       );
     }
 
+    if (aktivitas?.includes("Tambah")) {
+      return (
+        <NotificationsOutlinedIcon color="success" />
+      );
+    }
+
+    if (aktivitas?.includes("Status")) {
+      return (
+        <SyncAltOutlinedIcon color="success" />
+      );
+    }
+
     if (
+      aktivitas?.includes("Update") ||
       aktivitas?.includes("Revisi")
     ) {
       return (
@@ -131,19 +142,15 @@ export default function Notifikasi() {
       );
     }
 
-    if (
-      aktivitas?.includes("Status")
-    ) {
+    if (aktivitas?.includes("Hapus")) {
       return (
-        <SyncAltOutlinedIcon color="success" />
+        <DeleteOutlineOutlinedIcon color="error" />
       );
     }
 
-    if (
-      aktivitas?.includes("Hapus")
-    ) {
+    if (aktivitas?.includes("Assignment")) {
       return (
-        <DeleteOutlineOutlinedIcon color="error" />
+        <NotificationsOutlinedIcon color="info" />
       );
     }
 
@@ -151,6 +158,7 @@ export default function Notifikasi() {
       <NotificationsOutlinedIcon color="primary" />
     );
   };
+
 
   // ================= STATUS COLOR =================
   const getStatusColor = (status) => {
@@ -165,6 +173,144 @@ export default function Notifikasi() {
       return "error";
 
     return "default";
+  };
+
+
+    const getNotificationText = (item) => {
+
+    switch (item.aktivitas) {
+
+      case "Update Status":
+        return (
+          <>
+            <strong>{item.nama_lengkap}</strong>
+            {" "}mengubah status dokumen
+            <br />
+
+            <strong>{item.nama_dokumen}</strong>
+
+            <br />
+
+            pada proyek
+
+            <strong>
+              {" "}{item.nama_proyek}
+            </strong>
+
+            <br />
+
+            dari
+            {" "}
+            <strong>
+              {item.status_lama}
+            </strong>
+
+            {" → "}
+
+            <strong>
+              {item.status_baru}
+            </strong>
+          </>
+        );
+
+      case "Upload Versi Baru":
+        return (
+          <>
+            <strong>{item.nama_lengkap}</strong>
+            {" "}mengupload versi baru dokumen
+
+            <br />
+
+            <strong>{item.nama_dokumen}</strong>
+
+            <br />
+
+            pada proyek
+
+            <strong>
+              {" "}{item.nama_proyek}
+            </strong>
+
+            <br />
+
+            {item.keterangan}
+          </>
+        );
+
+      case "Upload Dokumen":
+        return (
+          <>
+            <strong>{item.nama_lengkap}</strong>
+            {" "}mengupload dokumen
+
+            <br />
+
+            <strong>{item.nama_dokumen}</strong>
+
+            <br />
+
+            pada proyek
+
+            <strong>
+              {" "}{item.nama_proyek}
+            </strong>
+          </>
+        );
+
+      case "Update Nama Dokumen":
+      return (
+        <>
+          <strong>{item.nama_lengkap}</strong>
+          {" "}mengubah nama dokumen
+
+          <br />
+
+          <strong>{item.nama_dokumen}</strong>
+
+          <br />
+
+          pada proyek
+
+          <strong>
+            {" "}{item.nama_proyek}
+          </strong>
+        </>
+      );
+
+      case "Hapus Dokumen":
+        return (
+          <>
+            <strong>{item.nama_lengkap}</strong>
+            {" "}menghapus dokumen
+
+            <br />
+
+            <strong>{item.nama_dokumen}</strong>
+
+            <br />
+
+            pada proyek
+
+            <strong>
+              {" "}{item.nama_proyek}
+            </strong>
+          </>
+        );
+
+      default:
+        return (
+          <>
+            <strong>
+              {item.nama_lengkap}
+            </strong>
+
+            {" "}
+
+            {item.keterangan ||
+              item.aktivitas}
+          </>
+        );
+    }
   };
 
   return (
@@ -299,41 +445,9 @@ export default function Notifikasi() {
                       }}
                     >
 
-                      <strong>
-                        {item.nama_lengkap || "User"}
-                      </strong>
-
-                      {" "}
-
-                      {item.aktivitas?.toLowerCase() || "melakukan aktivitas"}
-
-                      {" "}
-
-                      <strong>
-                        {item.nama_dokumen || "dokumen"}
-                      </strong>
-
-                      {" pada proyek "}
-
-                      <strong>
-                        {item.nama_proyek || "-"}
-                      </strong>
+                      {getNotificationText(item)}
 
                     </Typography>
-
-                    {/* KETERANGAN */}
-                    {item.keterangan && (
-
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        display="block"
-                        sx={{ mt: 1 }}
-                      >
-                        📝 {item.keterangan}
-                      </Typography>
-
-                    )}
 
                     {/* TIME */}
                     <Typography

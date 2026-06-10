@@ -226,9 +226,15 @@ export default function Dokumen() {
 
     try {
 
-      await axios.delete(
-        `http://localhost:5000/dokumen/${id}`
-      );
+    await axios.delete(
+      `http://localhost:5000/dokumen/${id}`,
+      {
+        headers: {
+          id_user: user.id_user,
+          role: user.role
+        }
+      }
+    );
 
       fetchData();
 
@@ -273,13 +279,19 @@ export default function Dokumen() {
 
     try {
 
-      await axios.put(
-        `http://localhost:5000/dokumen/${selectedDoc.id_dokumen}`,
-        {
-          nama_dokumen: editNama,
-          status: editStatus
+    await axios.put(
+      `http://localhost:5000/dokumen/${selectedDoc.id_dokumen}`,
+      {
+        nama_dokumen: editNama,
+        status: editStatus
+      },
+      {
+        headers: {
+          id_user: user.id_user,
+          role: user.role
         }
-      );
+      }
+    );
 
       setOpenEdit(false);
 

@@ -18,8 +18,15 @@ export const logActivity = async ({
   try {
 
     await db.query(
-      `INSERT INTO log_aktivitas 
-      (id_user, id_dokumen, aktivitas, status_lama, status_baru, keterangan)
+      `INSERT INTO log_aktivitas
+      (
+        id_user,
+        id_dokumen,
+        aktivitas,
+        status_lama,
+        status_baru,
+        keterangan
+      )
       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         id_user,
@@ -31,10 +38,16 @@ export const logActivity = async ({
       ]
     );
 
-    console.log("LOG BERHASIL DISIMPAN");
+    console.log(
+      "LOG BERHASIL:",
+      id_user
+    );
 
   } catch (err) {
 
-    console.error("ERROR LOG:", err);
+    console.error(
+      "ERROR LOG:",
+      err
+    );
   }
 };

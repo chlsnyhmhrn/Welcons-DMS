@@ -1,5 +1,6 @@
 import db from "../config/db.js";
 import bcrypt from "bcrypt";
+import { logActivity } from "../utils/logActivity.js";
 
 // ================= GET ALL USER =================
 export const getUsers = async (req, res) => {
@@ -72,6 +73,13 @@ export const createUser = async (req, res) => {
       role
     ]);
 
+    // ================= LOG =================
+    await logActivity({
+      id_user: req.user?.id_user,
+      aktivitas: "Tambah User",
+      keterangan: `Menambahkan user ${nama_lengkap} (${role})`
+    });
+
     res.json({
       message:
         "User berhasil ditambahkan"
@@ -105,6 +113,12 @@ export const updateUser = async (req, res) => {
       role
     } = req.body;
 
+    // ================= DATA LAMA =================
+    const [oldUser] = await db.query(
+      "SELECT * FROM users WHERE id_user = ?",
+      [id]
+    );
+
     // ================= UPDATE USER =================
     const sql = `
       UPDATE users
@@ -121,6 +135,14 @@ export const updateUser = async (req, res) => {
       role,
       id
     ]);
+
+    // ================= LOG =================
+    await logActivity({
+      id_user: req.user?.id_user,
+      aktivitas: "Update User",
+      keterangan:
+        `Mengubah data user ${oldUser[0].nama_lengkap}`
+    });
 
     res.json({
       message:
@@ -149,6 +171,12 @@ export const deleteUser = async (req, res) => {
     const { id } =
       req.params;
 
+    // ================= AMBIL DATA USER =================
+    const [user] = await db.query(
+      "SELECT * FROM users WHERE id_user = ?",
+      [id]
+    );
+
     // ================= DELETE RELASI USER PROYEK =================
     await db.query(
       `
@@ -166,6 +194,14 @@ export const deleteUser = async (req, res) => {
       `,
       [id]
     );
+
+    // ================= LOG =================
+    await logActivity({
+      id_user: req.user?.id_user,
+      aktivitas: "Hapus User",
+      keterangan:
+        `Menghapus user ${user[0].nama_lengkap}`
+    });
 
     res.json({
       message:

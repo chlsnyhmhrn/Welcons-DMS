@@ -5,7 +5,7 @@ export const getLogAktivitas = async (req, res) => {
   try {
 
     let query = `
-      SELECT 
+      SELECT
         l.*,
         u.nama_lengkap,
         d.nama_dokumen,
@@ -34,8 +34,7 @@ export const getLogAktivitas = async (req, res) => {
     const id_user = req.headers.id_user;
 
     if (
-      role === "pengawas" ||
-      role === "admin"
+      role === "pengawas"
     ) {
 
       query += `

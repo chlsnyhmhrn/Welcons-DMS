@@ -15,10 +15,12 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function TambahProyek() {
 
   const navigate = useNavigate();
+  const { user } = useAuth();
 
 const [form, setForm] = useState({
 
@@ -136,8 +138,9 @@ const [form, setForm] = useState({
           method: "POST",
 
           headers: {
-            "Content-Type":
-              "application/json"
+            "Content-Type": "application/json",
+            id_user: user.id_user,
+            role: user.role
           },
 
           body: JSON.stringify(form)

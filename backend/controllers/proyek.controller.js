@@ -1,4 +1,5 @@
 import db from "../config/db.js";
+import { logActivity } from "../utils/logActivity.js";
 
 // 🔥 HELPER FORMAT TANGGAL
 const formatDate = (date) => {
@@ -96,7 +97,7 @@ export const tambahProyek = async (req, res) => {
       `PRJ-${String(lastId).padStart(3, "0")}`;
 
     // 🔥 INSERT
-    await db.query(
+    const [result] = await db.query(
       `INSERT INTO proyek 
       (
         kode_proyek,
@@ -112,28 +113,22 @@ export const tambahProyek = async (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         kodeProyek,
-
         nama_proyek,
-
         lokasi || null,
-
-        formatDate(
-          tanggal_mulai
-        ),
-
+        formatDate(tanggal_mulai),
         status_proyek || null,
-
         deskripsi || null,
-
         jenis_proyek || null,
-
         jumlah_lantai || null,
-
-        JSON.stringify(
-          bidang_pengawasan || []
-        )
+        JSON.stringify(bidang_pengawasan || [])
       ]
     );
+
+    await logActivity({
+      id_user: req.user?.id_user,
+      aktivitas: "Tambah Proyek",
+      keterangan: `Menambahkan proyek ${nama_proyek}`
+    });
 
     res.json({
       message:
@@ -185,6 +180,11 @@ export const updateProyek = async (req, res) => {
       bidang_pengawasan
 
     } = req.body;
+
+    const [oldProyek] = await db.query(
+      "SELECT * FROM proyek WHERE id_proyek = ?",
+      [id]
+    );
 
     const [result] = await db.query(
       `UPDATE proyek SET 
@@ -241,6 +241,12 @@ export const updateProyek = async (req, res) => {
           "Proyek tidak ditemukan atau data tidak berubah"
       });
     }
+
+    await logActivity({
+      id_user: req.user?.id_user,
+      aktivitas: "Update Proyek",
+      keterangan: `Mengubah proyek ${oldProyek[0].nama_proyek}`
+    });
 
     res.json({
       message:
@@ -312,6 +318,12 @@ export const saveAssignProyek = async (req, res) => {
 
   try {
 
+    console.log("=================================");
+    console.log("SAVE ASSIGN PROYEK");
+    console.log("REQ.USER:", req.user);
+    console.log("BODY:", req.body);
+    console.log("=================================");
+
     const { id } =
       req.params;
 
@@ -369,6 +381,17 @@ export const saveAssignProyek = async (req, res) => {
       }
     }
 
+    const [proyek] = await db.query(
+      "SELECT nama_proyek FROM proyek WHERE id_proyek = ?",
+      [id]
+    );
+
+    await logActivity({
+      id_user: req.user?.id_user,
+      aktivitas: "Assignment Tim Proyek",
+      keterangan: `Mengubah assignment tim proyek ${proyek[0].nama_proyek}`
+    });
+
     res.json({
       message:
         "Assignment berhasil disimpan"
@@ -396,6 +419,11 @@ export const deleteProyek = async (req, res) => {
     const id =
       Number(req.params.id);
 
+    const [proyek] = await db.query(
+      "SELECT * FROM proyek WHERE id_proyek = ?",
+      [id]
+    );
+
     console.log(
       "DELETE ID:",
       id
@@ -420,6 +448,13 @@ export const deleteProyek = async (req, res) => {
           "Proyek tidak ditemukan"
       });
     }
+
+    console.log("REQ USER PROYEK:", req.user);
+    await logActivity({
+      id_user: req.user?.id_user,
+      aktivitas: "Hapus Proyek",
+      keterangan: `Menghapus proyek ${proyek[0]?.nama_proyek || "-" }`
+    });
 
     res.json({
       message:

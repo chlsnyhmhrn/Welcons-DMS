@@ -283,25 +283,24 @@ export default function DetailMonitoring() {
 
       if (!proyek) return;
 
-      await fetch(
-        `http://localhost:5000/proyek/${proyek.id_proyek}/users`,
-        {
-          method: "POST",
+        await fetch(
+          `http://localhost:5000/proyek/${proyek.id_proyek}/users`,
+          {
+            method: "POST",
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+            headers: {
+              "Content-Type": "application/json",
 
-          body: JSON.stringify({
-            admin:
-              selectedAdmin,
+              id_user: user.id_user,
+              role: user.role
+            },
 
-            pengawas:
-              selectedPengawas
-          })
-        }
-      );
+            body: JSON.stringify({
+              admin: selectedAdmin,
+              pengawas: selectedPengawas
+            })
+          }
+        );
 
       await fetchAssignment();
 

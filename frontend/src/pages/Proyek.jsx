@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layout/MainLayout";
+import { useAuth } from "../context/AuthContext";
 
 import {
   Box,
@@ -19,6 +20,7 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { useNavigate } from "react-router-dom";
 
 export default function Proyek() {
+  const { user } = useAuth();
 
   const [proyek, setProyek] = useState([]);
 
@@ -78,12 +80,17 @@ export default function Proyek() {
 
     try {
 
-      await fetch(
-        `http://localhost:5000/proyek/${id}`,
-        {
-          method: "DELETE"
+    await fetch(
+      `http://localhost:5000/proyek/${id}`,
+      {
+        method: "DELETE",
+
+        headers: {
+          id_user: user.id_user,
+          role: user.role
         }
-      );
+      }
+    );
 
       fetchData();
 

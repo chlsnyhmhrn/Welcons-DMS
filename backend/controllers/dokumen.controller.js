@@ -3,6 +3,31 @@ import { logActivity } from "../utils/logActivity.js";
 import crypto from "crypto";
 import fs from "fs";
 
+
+    const canManageProject = async (
+      id_user,
+      id_proyek,
+      role
+    ) => {
+
+      // Direktur bebas semua proyek
+      if (role === "direktur") {
+        return true;
+      }
+
+      const [rows] = await db.query(`
+        SELECT *
+        FROM user_proyek
+        WHERE id_user = ?
+        AND id_proyek = ?
+      `, [
+        id_user,
+        id_proyek
+      ]);
+
+      return rows.length > 0;
+    };
+
 // ================= GET ALL DOKUMEN =================
 export const getAllDokumen = async (req, res) => {
   try {
@@ -114,6 +139,20 @@ export const uploadDokumen = async (req, res) => {
       item_pekerjaan,
       status
     } = req.body;
+
+    const allowed =
+      await canManageProject(
+        req.user.id_user,
+        id_proyek,
+        req.user.role
+      );
+
+    if (!allowed) {
+      return res.status(403).json({
+        message:
+          "Anda tidak memiliki akses untuk mengelola dokumen pada proyek ini"
+      });
+    }
 
     const file = req.file?.filename;
 
@@ -271,7 +310,7 @@ export const uploadDokumen = async (req, res) => {
       aktivitas: "Upload Versi Baru",
       status_lama: lastDoc.status,
       status_baru: status || "Perlu Revisi",
-      keterangan: `Upload versi ${newVersi}`
+      keterangan: `Versi ${newVersi}`
     });
 
     res.json({
@@ -328,6 +367,7 @@ export const updateDokumen = async (req, res) => {
       nama_dokumen,
       status
     } = req.body;
+    
 
     // ================= GET DATA LAMA =================
     const [doc] = await db.query(`
@@ -343,6 +383,20 @@ export const updateDokumen = async (req, res) => {
     }
 
     const current = doc[0];
+
+    const allowed =
+      await canManageProject(
+        req.user.id_user,
+        current.id_proyek,
+        req.user.role
+      );
+
+    if (!allowed) {
+      return res.status(403).json({
+        message:
+          "Anda tidak memiliki akses untuk mengubah dokumen ini"
+      });
+    }
 
     // ================= UPDATE DATA =================
     await db.query(`
@@ -422,7 +476,9 @@ export const deleteDokumen = async (req, res) => {
     const { id } = req.params;
 
     const [doc] = await db.query(`
-      SELECT parent_id
+      SELECT
+        parent_id,
+        id_proyek
       FROM dokumen
       WHERE id_dokumen = ?
     `, [id]);
@@ -430,6 +486,22 @@ export const deleteDokumen = async (req, res) => {
     if (doc.length === 0) {
       return res.status(404).json({
         message: "Dokumen tidak ditemukan"
+      });
+    }
+
+    const current = doc[0];
+
+    const allowed =
+      await canManageProject(
+        req.user.id_user,
+        current.id_proyek,
+        req.user.role
+      );
+
+    if (!allowed) {
+      return res.status(403).json({
+        message:
+          "Anda tidak memiliki akses untuk menghapus dokumen ini"
       });
     }
 
@@ -476,6 +548,20 @@ export const updateStatus = async (req, res) => {
     }
 
     const current = doc[0];
+
+    const allowed =
+      await canManageProject(
+        req.user.id_user,
+        current.id_proyek,
+        req.user.role
+      );
+
+    if (!allowed) {
+      return res.status(403).json({
+        message:
+          "Anda tidak memiliki akses untuk mengubah status dokumen ini"
+      });
+    }
 
     if (status === "Final") {
 

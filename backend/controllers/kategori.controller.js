@@ -1,4 +1,5 @@
 import db from "../config/db.js";
+import { logActivity } from "../utils/logActivity.js";
 
 // ================= GET SEMUA KATEGORI =================
 export const getKategori = async (req, res) => {
@@ -85,6 +86,12 @@ export const createKategori = async (req, res) => {
       [kode, id]
     );
 
+    await logActivity({
+      id_user: req.user?.id_user,
+      aktivitas: "Tambah Kategori",
+      keterangan: `Menambahkan kategori ${nama_kategori}`
+    });
+
     // 🔥 AMBIL DATA BARU
     const [newData] = await db.query(
       `SELECT * FROM kategori_dokumen
@@ -156,6 +163,7 @@ export const updateKategori = async (req, res) => {
           "Kategori tidak ditemukan"
       });
     }
+    const oldKategori = cek[0];
 
     // 🔥 UPDATE
     await db.query(
@@ -183,6 +191,12 @@ export const updateKategori = async (req, res) => {
         id
       ]
     );
+
+    await logActivity({
+      id_user: req.user?.id_user,
+      aktivitas: "Update Kategori",
+      keterangan: `Mengubah kategori ${oldKategori.nama_kategori}`
+    }); 
 
     res.json({
       message:
@@ -220,6 +234,7 @@ export const deleteKategori = async (req, res) => {
           "Kategori tidak ditemukan"
       });
     }
+    const kategori = cek[0];
 
     // 🔥 DELETE
     await db.query(
@@ -227,6 +242,12 @@ export const deleteKategori = async (req, res) => {
        WHERE id_kategori = ?`,
       [id]
     );
+
+    await logActivity({
+      id_user: req.user?.id_user,
+      aktivitas: "Hapus Kategori",
+      keterangan: `Menghapus kategori ${kategori.nama_kategori}`
+    });
 
     res.json({
       message:

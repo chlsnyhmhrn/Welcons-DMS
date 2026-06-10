@@ -172,17 +172,29 @@ export default function Kategori() {
       // ================= EDIT =================
       if (editId) {
 
-        await axios.put(
-          `http://localhost:5000/kategori/${editId}`,
-          form
-        );
+      await axios.put(
+        `http://localhost:5000/kategori/${editId}`,
+        form,
+        {
+          headers: {
+            id_user: user.id_user,
+            role: user.role
+          }
+        }
+      );
 
       } else {
 
         // ================= TAMBAH =================
         await axios.post(
           "http://localhost:5000/kategori",
-          form
+          form,
+          {
+            headers: {
+              id_user: user?.id_user,
+              role: user?.role
+            }
+          }
         );
       }
 
@@ -243,9 +255,15 @@ export default function Kategori() {
 
     try {
 
-      await axios.delete(
-        `http://localhost:5000/kategori/${id}`
-      );
+    await axios.delete(
+      `http://localhost:5000/kategori/${id}`,
+      {
+        headers: {
+          id_user: user.id_user,
+          role: user.role
+        }
+      }
+    );
 
       fetchData();
 
